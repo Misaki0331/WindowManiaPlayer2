@@ -1,0 +1,5 @@
+# visual studioのやーつ
+.vs/
+# binとobjを削除
+WindowManiaPlayer2/bin/
+WindowManiaPlayer2/obj/

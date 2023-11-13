@@ -82,6 +82,8 @@ namespace WindowManiaPlayer
         DebugWindow dw = new();
         void load()
         {
+            notesObjects.Clear();
+            timingObjects.Clear();
             endtime = 0;
             StreamReader sr = new StreamReader(
                 textBox1.Text, Encoding.UTF8);
@@ -218,11 +220,24 @@ namespace WindowManiaPlayer
                 notesObjects[i].LongScrollTime = ((double)scrolloffset2 + (notesObjects[i].Time + notesObjects[i].LongNote - offset2) * scrollspeed2) - notesObjects[i].ScrollTime;
             }
 
-            notesObjects.Sort((a, b) => (int)(a.ScrollTime - b.ScrollTime));
+            notesObjects.Sort((a, b) => Math.Sign(a.ScrollTime - b.ScrollTime));
         }
         private void playerplay_Click(object sender, EventArgs e)
         {
             load();
+            int faster = 0;
+            for (int i = 0; i < notesObjects.Count; i++)
+            {
+                int cnt = notesObjects.FindAll(a => a.ScrollTime - notesObjects[i].ScrollTime < 500 && a.ScrollTime - notesObjects[i].ScrollTime > -500).Count;
+                if (cnt > faster) faster = cnt;
+            }
+            if (faster > 100)
+            {
+                if(MessageBox.Show($"この譜面は描画処理が極端重くなる可能性があります。\nスクロール速度1秒に表示される想定数は {faster} 個です。\nそれでも実行しますか？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
+                {
+                    return;
+                }
+            }
             var screen = System.Windows.Forms.Screen.PrimaryScreen;
             int width = screen.Bounds.Width;
             int height = screen.Bounds.Height;
@@ -332,24 +347,34 @@ namespace WindowManiaPlayer
                                 if(!win.WillHide) notecounts++;
                                 win.WillHide = true;
                             }
-                                if (notesObjects[win.NoteNumber].LongScrollTime >= (height- shortsize) /2)
+                            if (notesObjects[win.NoteNumber].LongScrollTime >= (height - shortsize) / 2)
+                            {
+                                if (scrollTime >= notesObjects[win.NoteNumber].ScrollTime && scrollTime < notesObjects[win.NoteNumber].ScrollTime + notesObjects[win.NoteNumber].LongScrollTime - (height - shortsize) / 2)
                                 {
-                                    if (scrollTime >= notesObjects[win.NoteNumber].ScrollTime && scrollTime < notesObjects[win.NoteNumber].ScrollTime + notesObjects[win.NoteNumber].LongScrollTime - (height - shortsize) / 2)
+                                    win.Location = new Point((width - 512 * 2) / 2 + notesObjects[win.NoteNumber].Position * 2 - 75, 0);
+                                }
+                                else
+                                {
+                                    int x = (width - 512 * 2) / 2 + notesObjects[win.NoteNumber].Position * 2 - 75;
+                                    if (scrollTime > notesObjects[win.NoteNumber].ScrollTime)
                                     {
-                                        win.Location = new Point((width - 512*2) / 2 + notesObjects[win.NoteNumber].Position * 2 - 75, 0);
+                                        int y = (int)(height - (notesObjects[win.NoteNumber].ScrollTime + notesObjects[win.NoteNumber].LongScrollTime - scrollTime) * 2 - shortsize);
+                                        if (win.Location.X != x || (win.Location.Y >= -height && win.Location.Y <= height) || (y >= -height && y <= height)) win.Location = new Point(x, y);
                                     }
                                     else
                                     {
-                                        if (scrollTime > notesObjects[win.NoteNumber].ScrollTime)
-                                            win.Location = new Point((width - 512*2) / 2 + notesObjects[win.NoteNumber].Position * 2 - 75, (int)(height - (notesObjects[win.NoteNumber].ScrollTime + notesObjects[win.NoteNumber].LongScrollTime - scrollTime) * 2 - shortsize));
-                                        else
-                                            win.Location = new Point((width - 512*2) / 2 + notesObjects[win.NoteNumber].Position * 2 - 75, (int)(height - (notesObjects[win.NoteNumber].ScrollTime + (height - shortsize) / 2 - scrollTime) * 2 - 50));
+                                        int y = (int)(height - (notesObjects[win.NoteNumber].ScrollTime + (height - shortsize) / 2 - scrollTime) * 2 - 50);
+                                        if (win.Location.X != x || (win.Location.Y >= -height && win.Location.Y <= height) || (y >= -height && y <= height)) win.Location = new Point(x, y);
                                     }
-
                                 }
-                                else
-                                    win.Location = new Point((width - 512*2) / 2 + notesObjects[win.NoteNumber].Position * 2 - 75, (int)(height - (notesObjects[win.NoteNumber].ScrollTime + notesObjects[win.NoteNumber].LongScrollTime - scrollTime) * 2 - shortsize));
-                                
+
+                            }
+                            else
+                            {
+                                int x = (width - 512 * 2) / 2 + notesObjects[win.NoteNumber].Position * 2 - 75;
+                                int y = (int)(height - (notesObjects[win.NoteNumber].ScrollTime + notesObjects[win.NoteNumber].LongScrollTime - scrollTime) * 2 - shortsize);
+                                if (win.Location.X != x || (win.Location.Y >= -height && win.Location.Y <= height) || (y >= -height && y <= height)) win.Location = new Point(x, y);
+                            }
                             
                         }
                     }
@@ -422,25 +447,34 @@ namespace WindowManiaPlayer
 
         private void link_github_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("https://misaki-chan.world/");
+            System.Diagnostics.Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = "https://misaki-chan.world/",
+            });
         }
 
         private void link_twitter_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("https://misskey.io/@ms");
+            System.Diagnostics.Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = "https://misskey.io/@ms",
+            });
 
         }
 
         private void link_repository_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/Misaki0331/WindowManiaPlayer2");
+            System.Diagnostics.Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = "https://github.com/Misaki0331/WindowManiaPlayer2",
+            });
         }
 
         private void filedialog_FileOk(object sender, CancelEventArgs e)
         {
-
-            notesObjects.Clear();
-            timingObjects.Clear();
             textBox1.Text = filedialog.FileName;
 
         }
