@@ -246,6 +246,7 @@ namespace WindowManiaPlayer
             bool isdebug = IsDebugMode.Checked;
             if (isdebug)
             {
+                dw.WantClose = false;
                 dw.Show();
                 dw.Location = new Point(10, 10);
             }
@@ -270,7 +271,6 @@ namespace WindowManiaPlayer
             double bpm = 0;
             while (timer.ElapsedMilliseconds - 3000 < endtime || notewindow.Find(a => a.NoteNumber != -1) != null)
             {
-                
                 if(isdebug)tmplp[timer.ElapsedMilliseconds / 20 % 50]++;
                 int now = (int)timer.ElapsedMilliseconds - 3000;
                 if (!started && now > numericUpDown1.Value)
@@ -313,6 +313,7 @@ namespace WindowManiaPlayer
                                         empty.Opacity = 1;
                                         if (notesObjects[notecount].LongScrollTime != 0)
                                             empty.ClientSize = new(150, (int)((double)notesObjects[notecount].LongScrollTime * 2 + shortsize));
+                                        else empty.ClientSize = new(150, shortsize);
                                         if (isEmpty) notewindow.Add(empty);
                                     }
 
@@ -425,6 +426,11 @@ namespace WindowManiaPlayer
                     notewindow.Remove(empty);
                     cnt++;
                     if (cnt >= 3) break;
+                    }
+                if (dw.WantClose)
+                {
+                    StopSound();
+                    break;
                 }
             }
             foreach(var win in notewindow)

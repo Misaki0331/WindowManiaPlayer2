@@ -16,10 +16,11 @@ namespace WindowManiaPlayer
         {
             InitializeComponent();
         }
-
+        public bool WantClose = false;
         private void debug_FormClosing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = true;
+            WantClose = true;
         }
     }
 }

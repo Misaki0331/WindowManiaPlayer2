@@ -17,6 +17,8 @@ namespace WindowManiaPlayer
         public Notes()
         {
             InitializeComponent();
+
+           // ClientSize = new(150, 1);
             Hide();
         }
         public int NoteNumber=-1;
