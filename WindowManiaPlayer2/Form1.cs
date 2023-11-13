@@ -224,6 +224,11 @@ namespace WindowManiaPlayer
         }
         private void playerplay_Click(object sender, EventArgs e)
         {
+            try
+            {
+                StopSound();
+            }
+            catch{}
             load();
             int faster = 0;
             for (int i = 0; i < notesObjects.Count; i++)
